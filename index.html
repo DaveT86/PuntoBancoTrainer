@@ -58,6 +58,11 @@
             height: 50px;
             font-size: 20px;
         }
+        #inputDisplay {
+            font-size: 24px;
+            margin-top: 10px;
+            min-height: 30px; /* For consistent spacing */
+        }
     </style>
 </head>
 <body>
@@ -67,7 +72,7 @@
     
     <div id="questionContainer">
         <div id="question"></div>
-        <input type="text" id="answerInput" placeholder="Your answer" />
+        <div id="inputDisplay"></div> <!-- Display for input -->
         <div id="progress"></div>
         
         <!-- Number Pad -->
@@ -93,6 +98,11 @@
         let questions = [];
         let currentQuestionIndex = 0;
         let startTime;
+        let currentInput = ""; // Store current input
+
+        function isTouchDevice() {
+            return 'ontouchstart' in window || navigator.maxTouchPoints;
+        }
 
         function generateQuestions(tables, rouletteMode = false) {
             const questionsArray = [];
@@ -147,6 +157,8 @@
         function startGame() {
             currentQuestionIndex = 0;
             startTime = Date.now();
+            currentInput = ""; // Reset input
+            document.getElementById('inputDisplay').innerText = ""; // Clear display
             document.getElementById('questionContainer').style.display = 'block';
             document.getElementById('progress').innerText = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
             askQuestion();
@@ -155,8 +167,6 @@
         function askQuestion() {
             if (currentQuestionIndex < questions.length) {
                 document.getElementById('question').innerText = questions[currentQuestionIndex].question;
-                document.getElementById('answerInput').value = ''; // Clear input
-                document.getElementById('answerInput').focus();
             } else {
                 const endTime = Date.now();
                 const totalTime = (endTime - startTime) / 1000;
@@ -165,28 +175,37 @@
             }
         }
 
-        document.getElementById('answerInput').addEventListener('input', handleInput);
-
         function handleInput() {
-            const input = parseInt(document.getElementById('answerInput').value);
+            const input = parseInt(currentInput);
             const currentQuestion = questions[currentQuestionIndex];
 
             if (input === currentQuestion.answer) {
                 currentQuestionIndex++;
                 document.getElementById('progress').innerText = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
                 askQuestion();
+                currentInput = ""; // Reset input after answering
+                document.getElementById('inputDisplay').innerText = ""; // Clear display
             }
         }
 
         function addToInput(num) {
-            const inputField = document.getElementById('answerInput');
-            inputField.value += num;
+            currentInput += num; // Append number to input
+            document.getElementById('inputDisplay').innerText = currentInput; // Update display
             handleInput(); // Check the input after adding
         }
 
         function clearInput() {
-            document.getElementById('answerInput').value = ''; 
+            currentInput = ''; // Clear input
+            document.getElementById('inputDisplay').innerText = ''; // Clear display
         }
+
+        // Modify input type based on device
+        window.onload = function() {
+            if (isTouchDevice()) {
+                // Hide the input field if it's a touch device
+                document.getElementById('answerInput').style.display = 'none';
+            }
+        };
     </script>
 </body>
 </html>
